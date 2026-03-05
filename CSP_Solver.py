@@ -109,3 +109,57 @@ def solve_csp(csp, config):
         "assignments_tried" : csp.assignments_tried,
         "backtracks" : csp.backtracks,
     }
+
+def sudoku_world():
+    rows = range(9)
+    columns = range(9)
+    variables = [(r, c) for r in rows for c in columns]
+    neighbors = {v : set() for v in variables}
+
+    for r in rows:
+        row_vars = [(r, c) for c in columns]
+        for v in row_vars:
+            neighbors[v].update(set(row_vars) - {v})
+    for c in columns:
+        column_vars = [(r, c) for r in rows]
+        for v in column_vars:
+            neighbors[v].update(set(column_vars) - {v})
+    for br in range(0, 9, 3):
+        for bc in range(0, 9, 3):
+            block = [(r, c) for r in range(br, br + 3) for c in range(bc, bc +3)]
+            for v in block:
+                neighbors[v].update(set(block) - {v})
+    return variables, neighbors
+
+def sudoku_constraints(Xi, vi, Xj, vj):
+    return vi != vj
+
+def parse_sudoku(grid_str):
+    assert len(grid_str) == 81
+    domains = {}
+    idx = 0
+    for r in range(9):
+        for c in range(9):
+            ch = grid_str[idx]
+            idx += 1
+            if ch == '.' or ch == '0':
+                domains[(r, c)] = set(range(1, 10))
+            else:
+                k = int(ch)
+                domains[(r, c)] = {k}
+    return domains
+
+def sudoku_grid(solution):
+    if solution is None:
+        return None
+    grid = [[0] * 9 for _ in range(9)]
+    for (r, c), v in solution.items():
+        grid[r][c] = v
+    return grid
+
+def create_sudoku_csp(grid_str):
+    variables, neighbors = sudoku_world()
+    domains = parse_sudoku(grid_str)
+    return CSP(variables, domains, neighbors, sudoku_constraints)
+
+
