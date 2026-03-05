@@ -65,4 +65,47 @@ def restore_domains(csp, removals):
     for var, vals in removals:
         csp.domains[var] |= vals
 
+def backtrack(csp, assignment, use_mrv, use_fc, use_lcv):
+    if len(assignment) == len(csp.variables):
+        return assignment
     
+    var = select_unassigned_variable(csp, assignment, use_mrv)
+    if var is None:
+        return assignment
+    
+    for value in order_domain_values(csp, var, assignment, use_lcv):
+        csp.assignments_tried += 1
+        if csp.is_consistent(var, value, assignment):
+            assignment[var] = value
+            removals = []
+            ok = True
+            if use_fc:
+                ok = forward_check(csp, var, value, assignment, removals)
+            if ok:
+                result = backtrack(csp, assignment, use_mrv, use_fc, use_lcv)
+                if result is not None:
+                    return result
+            if use_fc:
+                restore_domains(csp, removals)
+            del assignment[var]
+    csp.backtracks += 1
+    return None
+
+def solve_csp(csp, config):
+    use_mrv = config in ("mrv", "mrv_fc", "mrv_fc_lcv")
+    use_fc = config in ("mrv_fc", "mrv_fc_lcv")
+    use_lcv = config == "mrv_fc_lcv"
+
+    start = time.time()
+    assignment = {}
+    result = backtrack(csp, assignment, use_mrv, use_fc, use_lcv)
+    end = time.time()
+    solved = result is not None
+
+    return {
+        "solved" : solved,
+        "solution" : result,
+        "runtime_ms" : (end - start) * 1000.0,
+        "assignments_tried" : csp.assignments_tried,
+        "backtracks" : csp.backtracks,
+    }
