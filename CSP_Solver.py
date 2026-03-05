@@ -162,4 +162,33 @@ def create_sudoku_csp(grid_str):
     domains = parse_sudoku(grid_str)
     return CSP(variables, domains, neighbors, sudoku_constraints)
 
+def map_constraints(Xi, vi, Xj, vj):
+    return vi != vj
 
+def create_australia_map_csp():
+    regions = ["WA", "NT", "SA", "Q", "NSW", "V", "T"]
+    colors = ["red", "green", "blue"]
+    domains = {r: set(colors) for r in regions}
+    neighbors = {
+        "WA": {"NT", "SA"},
+        "NT": {"WA", "SA", "Q"},
+        "SA": {"WA", "NT", "Q", "NSW", "V"},
+        "Q": {"NT", "SA", "NSW"},
+        "NSW": {"Q", "SA", "V"},
+        "V": {"SA", "NSW", "T"},
+        "T": {"V"},
+    }
+    return CSP(regions, domains, neighbors, map_constraints)
+
+SUDOKU_INSTANCES = {
+    "easy1" : "53..7....6..195....98....6.8...6...34..8.3..17...2...6.6....28....419..5....8..79",
+    "easy2" : "1.5..2.84..3.5..1.8..1.9..2.7..4..6..4.8.3..9..6..1.3..2.7..9.5..3.1..71.9..4.2",
+    "medium1" : "6..874..1.1..9..7..7..1..9..9..5..3..3...4..5..2..8..2..6..3..8..3..6.4..321..9",
+    "medium2" : "..9748...7...........2.1.9..1.7..2..3.....8..6..3.4..4.5.2...........8...7639..",
+    "hard1" : ".....6....59.....82....8....8.2.3.9.7.......5.1.9.4.7....2....36.....58....3.....",
+    "hard2" : "1....7.9.3..2.....8..1..2..5..9.....4..3.1..9.....4..7..6..8..2.....1..9.8.3....",
+}
+
+MAP_INSTANCES = {
+    "australia" : "australia"
+}
