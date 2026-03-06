@@ -1,7 +1,6 @@
-import sys
 import json
 import time
-from copy import deepcopy
+import os
 from argparse import ArgumentParser
 
 class CSP:
@@ -193,6 +192,44 @@ MAP_INSTANCES = {
     "australia" : "australia"
 }
 
+def validate_sudoku_solution(grid):
+    for r in range(9):
+        for c in range(9):
+            if grid[r][c] == 0:
+                return False
+
+    for r in range(9):
+        if sorted(grid[r]) != list(range(1, 10)):
+            return False
+
+    for c in range(9):
+        column = [grid[r][c] for r in range(9)]
+        if sorted(column) != list(range(1, 10)):
+            return False
+
+    for br in range(0, 9, 3):
+        for bc in range(0, 9, 3):
+            block = []
+            for r in range(br, br + 3):
+                for c in range(bc, bc + 3):
+                    block.append(grid[r][c])
+            if sorted(block) != list(range(1, 10)):
+                return False
+    return True
+
+def validate_map_coloring(solution, neighbors):
+    for region in neighbors:
+        if region not in solution:
+            return False
+        if solution[region] is None:
+            return False
+
+    for u in neighbors:
+        for v in neighbors[u]:
+            if solution[u] == solution[v]:
+                return False
+    return True
+
 def run(problem, instance, config, seed = None):
     if problem == "sudoku":
         if instance not in SUDOKU_INSTANCES:
@@ -209,20 +246,42 @@ def run(problem, instance, config, seed = None):
     else:
         raise ValueError("problem has to be 'sudoku' or 'map'")
     
+    valid = True
+
+    if problem == "sudoku" and res["solved"]:
+        if not validate_sudoku_solution(res["solution"]):
+            print("Sudoku solution failed validation.")
+            valid = False
+
+    if problem == "map" and res["solved"]:
+        map_csp = create_australia_map_csp()
+        if not validate_map_coloring(res["solution"], map_csp.neighbors):
+            print("Map coloring solution failed validation.")
+            valid = False
+
+    
     out = {
         "problem" : problem,
         "instance" : instance,
         "config" : config,
         "solved" : res["solved"],
+        "valid": valid,
         "runtime_ms" : res["runtime_ms"],
         "assignments_tried" : res["assignments_tried"],
         "backtracks" : res["backtracks"],
         "solution" : res["solution"],
     }
 
+    base = f"results_{problem}_{instance}_{config}"
+    i = 1
+    filename = f"{base}_{i}.json"
+
+    while os.path.exists(filename):
+        i += 1
+        filename = f"{base}_{i}.json"
+
     print(json.dumps(out, indent=2))
-    fname = f"results_{problem}_{instance}_{config}.json"
-    with open(fname, "w") as f:
+    with open(filename, "w") as f:
         json.dump(out, f, indent=2)
 
 def main():
