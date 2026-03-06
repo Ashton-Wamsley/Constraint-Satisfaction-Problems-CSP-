@@ -192,3 +192,48 @@ SUDOKU_INSTANCES = {
 MAP_INSTANCES = {
     "australia" : "australia"
 }
+
+def run(problem, instance, config, seed = None):
+    if problem == "sudoku":
+        if instance not in SUDOKU_INSTANCES:
+            raise ValueError(f"Unknown sudoku instance {instance}")
+        grid_str = SUDOKU_INSTANCES[instance]
+        csp = create_sudoku_csp(grid_str)
+        res = solve_csp(csp, config)
+        res["solution"] = sudoku_grid(res["solution"])
+    elif problem == "map":
+        if instance not in MAP_INSTANCES:
+            raise ValueError(f"Unknown map instance {instance}")
+        csp = create_australia_map_csp()
+        res = solve_csp(csp, config)
+    else:
+        raise ValueError("problem has to be 'sudoku' or 'map'")
+    
+    out = {
+        "problem" : problem,
+        "instance" : instance,
+        "config" : config,
+        "solved" : res["solved"],
+        "runtime_ms" : res["runtime_ms"],
+        "assignments_tried" : res["assignments_tried"],
+        "backtracks" : res["backtracks"],
+        "solution" : res["solution"],
+    }
+
+    print(json.dumps(out, indent=2))
+    fname = f"results_{problem}_{instance}_{config}.json"
+    with open(fname, "w") as f:
+        json.dump(out, f, indent=2)
+
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("--problem", required = True, choices = ["sudoku", "map"])
+    parser.add_argument("--instance", required = True)
+    parser.add_argument("--config", required = True, choices = ["baseline", "mrv", "mrv_fc", "mrv_fc_lcv"])
+    parser.add_argument("--seed", type = int, default = None)
+    args = parser.parse_args()
+    
+    run(args.problem, args.instance, args.config, args.seed)
+
+if __name__ == "__main__":
+    main()
