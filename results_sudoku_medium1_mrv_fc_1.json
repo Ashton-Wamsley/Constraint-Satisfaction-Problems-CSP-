@@ -1,0 +1,11 @@
+{
+  "problem": "sudoku",
+  "instance": "medium1",
+  "config": "mrv_fc",
+  "solved": false,
+  "valid": true,
+  "runtime_ms": 0.6134510040283203,
+  "assignments_tried": 32,
+  "backtracks": 13,
+  "solution": null
+}

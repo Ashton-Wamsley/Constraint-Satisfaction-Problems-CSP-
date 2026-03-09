@@ -1,0 +1,11 @@
+{
+  "problem": "sudoku",
+  "instance": "easy2",
+  "config": "mrv",
+  "solved": false,
+  "valid": true,
+  "runtime_ms": 3632.026433944702,
+  "assignments_tried": 1252859,
+  "backtracks": 319691,
+  "solution": null
+}
