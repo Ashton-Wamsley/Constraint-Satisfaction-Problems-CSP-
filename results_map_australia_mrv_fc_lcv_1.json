@@ -1,0 +1,19 @@
+{
+  "problem": "map",
+  "instance": "australia",
+  "config": "mrv_fc_lcv",
+  "solved": true,
+  "valid": true,
+  "runtime_ms": 0.10013580322265625,
+  "assignments_tried": 7,
+  "backtracks": 0,
+  "solution": {
+    "WA": "green",
+    "NT": "blue",
+    "SA": "red",
+    "Q": "green",
+    "NSW": "blue",
+    "V": "green",
+    "T": "blue"
+  }
+}
